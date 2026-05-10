@@ -1,0 +1,300 @@
+{
+  "name": "Alert Monitoring and Assigning Flow",
+  "nodes": [
+    {
+      "parameters": {
+        "trigger": [
+          "any_event"
+        ],
+        "channelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [
+        128,
+        864
+      ],
+      "id": "09df8722-5c35-4618-a61f-e54974593291",
+      "name": "Slack Trigger",
+      "webhookId": "cdd9210d-bb57-4964-87fe-313f3d00cac5"
+    },
+    {
+      "parameters": {
+        "content": "Slack Trigger Node which catches any event on official slack channels for alerts.\n\nNote -> Webhook connections work with slack."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        64,
+        720
+      ],
+      "id": "09fd3e93-1ed1-4260-9515-fcaba0949a37",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        864
+      ],
+      "id": "3e889c8a-0bdc-4335-9bd5-d6308961e8f1",
+      "name": "Code in Python"
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        752,
+        864
+      ],
+      "id": "fdd7a838-4cf1-45bb-8c2c-4ada316d2e20",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        672,
+        1104
+      ],
+      "id": "f1729003-141d-458d-acb9-535730aa55aa",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"Pic\":\"value\",\n  \"Summary\":\"value1\",\n  \"Priority\":\"P\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        992,
+        1088
+      ],
+      "id": "e6742078-75cd-4e6d-a398-d94114fff957",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "24aec2a3-a71c-4336-875d-37afd2d4817d",
+              "leftValue": "={{ $('Slack Trigger').item.json.attachments[0].color }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1136,
+        864
+      ],
+      "id": "a94d8671-84c8-48dd-b3fc-17bf2e458ca4",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "---Query Removed---",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        1472,
+        656
+      ],
+      "id": "98e2b04c-9419-4fad-86c7-5835eb9d9d25",
+      "name": "Execute a SQL query"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        1472,
+        944
+      ],
+      "id": "2d5342be-1948-4f75-9b73-5b9c875e16f3",
+      "name": "Select rows from a table"
+    },
+    {
+      "parameters": {
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1760,
+        944
+      ],
+      "id": "77024732-5d11-4ae2-9854-b3f34de1f15e",
+      "name": "Send a message",
+      "webhookId": "0934cb1e-87ca-4010-99f7-5c170cccdebb"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2016,
+        944
+      ],
+      "id": "ad143c24-c618-4308-bed7-41632768f45b",
+      "name": "Wait",
+      "webhookId": "19d74a4f-2580-4bf5-81a4-88992478bcbb"
+    },
+    {
+      "parameters": {
+        "content": "This is part of flow - > where the agent processes the alert and fetch information on it, what's the priority and who is the owner of alert ( you can attach a DB to fetch details in parallel also.  Now alert can be of two types here, is it a  alert to tell whether the issue is resolved and alett to tell issue occure. Prompting can be done accordingly to give outputs and flow is segregated based on that (Prompt is removed ). We used Gemini pro model for this. ",
+        "height": 368,
+        "width": 1568
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        464
+      ],
+      "id": "4d109de0-479f-437a-a834-85c9b470fb40",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code in Python": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Select rows from a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select rows from a table": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "31b28f93-86dc-41c2-a4ce-46b3817c4a35",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7c7627977d976df426d80dd5d9f30fae259ec3a722e68425625ad39d63ecc2c0"
+  },
+  "id": "2E1fyY8rYlIvRvFf",
+  "tags": []
+}
